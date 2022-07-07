@@ -53,13 +53,13 @@ int main(int argc, char** argv) {
     /// The node_key_type is important for the construction of edges. In this simple example it looks a bit redundant
     /// but once your node's data-structure becomes more complicated, this setup makes more sense.
     auto g = ya::graph_builder<node_data,edge_data,std::string>{}
-            .add_node("0", {"A"})                                   /// You can add nodes individually
-            .add_node("1", {"B"})
+            .add_node({"0", {"A"}})                                 /// You can add nodes individually
+            .add_node({"1", {"B"}})
             .add_edge("0","1",{"x:=1"})                             /// You can add edges individually (from, to, data)
             .add_nodes({{"2", {"C"}},{"3", {"D"}}})                 /// You can add nodes via initializer_lists
             .add_edges({{"2","1",{"x:=2"}},{"3","4",{"x:=3"}}})     /// You can add edges via initializer_lists
-            .add_node("5", {"F"})                                   /// You dont need to provide the objects in order
-            .add_node("4", {"E"})                                   /// You dont need to provide the objects in order
+            .add_node({"5", {"F"}})                                 /// You dont need to provide the objects in order
+            .add_node({"4", {"E"}})                                 /// You dont need to provide the objects in order
             //.optimize()                                           /// Optionally optimize the data before construction
             .build();                                               /// Finalize and construct the graph
     /// Now you have a graph object.
