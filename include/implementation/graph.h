@@ -75,8 +75,10 @@ namespace ya {
         };
         auto add_node(const node_construction_object& data) -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
         auto add_nodes(const std::initializer_list<node_construction_object>& data) -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
+        auto add_nodes(const std::vector<node_construction_object>& data) -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
         auto add_edge(const node_key_t& source, const node_key_t& target, const edge_data_t& data) -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
         auto add_edges(const std::initializer_list<edge_construction_object> &data) -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
+        auto add_edges(const std::vector<edge_construction_object> &data) -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
         auto validate() -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
         auto is_valid() -> bool;
         auto optimize() -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
@@ -100,6 +102,13 @@ namespace ya {
     }
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
+    auto graph_builder<node_data_t,edge_data_t,node_key_t>::add_nodes(const std::vector<node_construction_object>& data) -> graph_builder<node_data_t,edge_data_t,node_key_t>& {
+        for(const auto& d : data)
+            nodes.push_back(d);
+        return *this;
+    }
+
+    template<typename node_data_t, typename edge_data_t, typename node_key_t>
     auto graph_builder<node_data_t,edge_data_t,node_key_t>::add_edge(const node_key_t& source, const node_key_t& target, const edge_data_t &data) -> graph_builder<node_data_t,edge_data_t,node_key_t>& {
         edges.push_back({source, target, data});
         return *this;
@@ -107,6 +116,13 @@ namespace ya {
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
     auto graph_builder<node_data_t,edge_data_t,node_key_t>::add_edges(const std::initializer_list<edge_construction_object> &data) -> graph_builder<node_data_t,edge_data_t,node_key_t>& {
+        for(const auto& d : data)
+            edges.push_back(d);
+        return *this;
+    }
+
+    template<typename node_data_t, typename edge_data_t, typename node_key_t>
+    auto graph_builder<node_data_t,edge_data_t,node_key_t>::add_edges(const std::vector<edge_construction_object> &data) -> graph_builder<node_data_t,edge_data_t,node_key_t>& {
         for(const auto& d : data)
             edges.push_back(d);
         return *this;
