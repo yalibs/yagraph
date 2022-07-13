@@ -81,6 +81,7 @@ namespace ya {
         auto is_valid() -> bool;
         auto optimize() -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
         auto build() -> graph<node_data_t, edge_data_t, node_key_t>;
+        auto build_heap() -> std::unique_ptr<graph<node_data_t, edge_data_t, node_key_t>>;
 
         std::vector<node_construction_object> nodes;
         std::vector<edge_construction_object> edges;
@@ -151,6 +152,24 @@ namespace ya {
             result.edges[eco.data] = {eco.data, target_it};
             auto edge_it = result.edges.find(eco.data);
             if(edge_it == result.edges.end())
+                throw std::logic_error("edge construction failed");
+            source_it->second.outgoing_edges.push_back(edge_it);
+        }
+        return result;
+    }
+
+    template<typename node_data_t, typename edge_data_t, typename node_key_t>
+    auto graph_builder<node_data_t,edge_data_t,node_key_t>::build_heap() -> std::unique_ptr<graph<node_data_t,edge_data_t,node_key_t>> {
+        validate();
+        auto result = std::make_unique<graph<node_data_t,edge_data_t,node_key_t>>();
+        for(auto& nco : nodes)
+            result->nodes[nco.get_key()] = {nco.get_data(), {}};
+        for(auto& eco : edges) {
+            auto source_it = result->nodes.find(eco.source);
+            auto target_it = result->nodes.find(eco.target);
+            result->edges[eco.data] = {eco.data, target_it};
+            auto edge_it = result->edges.find(eco.data);
+            if(edge_it == result->edges.end())
                 throw std::logic_error("edge construction failed");
             source_it->second.outgoing_edges.push_back(edge_it);
         }
