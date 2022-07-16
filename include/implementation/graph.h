@@ -38,6 +38,7 @@ namespace ya {
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
     struct edge {
         edge_data_t data;
+        node_refference<node_data_t, edge_data_t, node_key_t> source;
         node_refference<node_data_t, edge_data_t, node_key_t> target;
     };
 
@@ -45,6 +46,7 @@ namespace ya {
     struct node {
         node_data_t data;
         std::vector<edge_refference<node_data_t,edge_data_t,node_key_t>> outgoing_edges;
+        std::vector<edge_refference<node_data_t,edge_data_t,node_key_t>> ingoing_edges;
     };
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
@@ -149,11 +151,12 @@ namespace ya {
         for(auto& eco : edges) {
             auto source_it = result.nodes.find(eco.source);
             auto target_it = result.nodes.find(eco.target);
-            result.edges[eco.data] = {eco.data, target_it};
+            result.edges[eco.data] = {eco.data, source_it, target_it};
             auto edge_it = result.edges.find(eco.data);
             if(edge_it == result.edges.end())
                 throw std::logic_error("edge construction failed");
             source_it->second.outgoing_edges.push_back(edge_it);
+            target_it->second.ingoing_edges.push_back(edge_it);
         }
         return result;
     }
