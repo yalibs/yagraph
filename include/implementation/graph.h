@@ -61,13 +61,13 @@ namespace ya {
         struct node_construction_object_separate_key {
             const node_key_t key;
             const node_data_t data;
-            auto get_key() -> node_key_t { return key; }
-            auto get_data() -> node_data_t { return data; }
+            auto get_key() const -> node_key_t { return key; }
+            auto get_data() const -> node_data_t { return data; }
         };
         struct node_construction_object_only_data {
             const node_key_t data;
-            auto get_key() -> node_key_t { return data; }
-            auto get_data() -> node_data_t { return data; }
+            auto get_key() const -> node_key_t { return data; }
+            auto get_data() const -> node_data_t { return data; }
         };
         using node_construction_object = std::conditional_t<std::is_same_v<node_data_t,node_key_t>, node_construction_object_only_data, node_construction_object_separate_key>;
         struct edge_construction_object {
@@ -117,18 +117,8 @@ namespace ya {
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
     auto graph_builder<node_data_t,edge_data_t,node_key_t>::validate() -> graph_builder<node_data_t,edge_data_t,node_key_t>& {
-        node_collection<node_data_t, edge_data_t, node_key_t> check_nodes{};
-        for(auto& nco : nodes)
-            check_nodes[nco.get_key()] = {nco.get_data(), {}};
-        for(auto& eco : edges) {
-            bool source_and_target_exist = check_nodes.contains(eco.source) && check_nodes.contains(eco.target);
-#ifndef NDEBUG
-            if (!source_and_target_exist)
-                throw std::range_error("invalid edge");
-#else
-            assert(source_and_target_exist);
-#endif
-        }
+        if(!is_valid())
+            throw std::logic_error("invalid graph");
         return *this;
     }
 
@@ -139,7 +129,13 @@ namespace ya {
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
     auto graph_builder<node_data_t,edge_data_t,node_key_t>::is_valid() -> bool {
-        return false; // TODO: Implement
+        node_collection<node_data_t, edge_data_t, node_key_t> check_nodes{};
+        for(auto& nco : nodes)
+            check_nodes[nco.get_key()] = {nco.get_data(), {}};
+        for(auto& eco : edges)
+            if (!check_nodes.contains(eco.source) && check_nodes.contains(eco.target))
+                return false;
+        return true;
     }
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
