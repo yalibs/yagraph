@@ -61,13 +61,13 @@ namespace ya {
         struct node_construction_object_separate_key {
             const node_key_t key;
             const node_data_t data;
-            auto get_key() -> node_key_t { return key; }
-            auto get_data() -> node_data_t { return data; }
+            auto get_key() const -> node_key_t { return key; }
+            auto get_data() const -> node_data_t { return data; }
         };
         struct node_construction_object_only_data {
             const node_key_t data;
-            auto get_key() -> node_key_t { return data; }
-            auto get_data() -> node_data_t { return data; }
+            auto get_key() const -> node_key_t { return data; }
+            auto get_data() const -> node_data_t { return data; }
         };
         using node_construction_object = std::conditional_t<std::is_same_v<node_data_t,node_key_t>, node_construction_object_only_data, node_construction_object_separate_key>;
         struct edge_construction_object {
