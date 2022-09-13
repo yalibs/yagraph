@@ -117,14 +117,8 @@ namespace ya {
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
     auto graph_builder<node_data_t,edge_data_t,node_key_t>::validate() -> graph_builder<node_data_t,edge_data_t,node_key_t>& {
-        node_collection<node_data_t, edge_data_t, node_key_t> check_nodes{};
-        for(auto& nco : nodes)
-            check_nodes[nco.get_key()] = {nco.get_data(), {}};
-        for(auto& eco : edges) {
-            bool source_and_target_exist = check_nodes.contains(eco.source) && check_nodes.contains(eco.target);
-            if (!source_and_target_exist)
-                throw std::range_error("invalid edge");
-        }
+        if(!is_valid())
+            throw std::logic_error("invalid graph");
         return *this;
     }
 
@@ -135,12 +129,13 @@ namespace ya {
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
     auto graph_builder<node_data_t,edge_data_t,node_key_t>::is_valid() -> bool {
-        try {
-            validate();
-            return true;
-        } catch (std::exception& e) {
-            return false;
-        }
+        node_collection<node_data_t, edge_data_t, node_key_t> check_nodes{};
+        for(auto& nco : nodes)
+            check_nodes[nco.get_key()] = {nco.get_data(), {}};
+        for(auto& eco : edges)
+            if (!check_nodes.contains(eco.source) && check_nodes.contains(eco.target))
+                return false;
+        return true;
     }
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
