@@ -27,13 +27,27 @@
 
 namespace ya {
     template<typename node_data_t, typename edge_data_t, typename node_key_t> struct edge;
-    template<typename node_data_t, typename edge_data_t, typename node_key_t> using edge_collection = std::unordered_map<edge_data_t, edge<node_data_t,edge_data_t,node_key_t>>;
-    template<typename node_data_t, typename edge_data_t, typename node_key_t> using edge_refference = typename edge_collection<node_data_t,edge_data_t,node_key_t>::iterator;
     template<typename node_data_t, typename edge_data_t, typename node_key_t> struct node;
+    template<typename node_data_t, typename edge_data_t, typename node_key_t> using edge_collection = std::unordered_map<edge_data_t, edge<node_data_t,edge_data_t,node_key_t>>;
     template<typename node_data_t, typename edge_data_t, typename node_key_t> using node_collection = std::unordered_map<node_key_t, node<node_data_t,edge_data_t,node_key_t>>;
-    template<typename node_data_t, typename edge_data_t, typename node_key_t> using node_refference = typename node_collection<node_data_t,edge_data_t,node_key_t>::iterator;
-    template<typename node_data_t, typename edge_data_t, typename node_key_t> using node_const_ref  = typename ya::node_collection<node_data_t,edge_data_t,node_key_t>::const_iterator;
-    template<typename node_data_t, typename edge_data_t, typename node_key_t> struct graph;
+    template<typename node_data_t, typename edge_data_t, typename node_key_t>
+    struct edge_refference {
+        typename edge_collection<node_data_t,edge_data_t,node_key_t>::iterator it{};
+        edge_refference(const typename edge_collection<node_data_t,edge_data_t,node_key_t>::iterator& it) : it{it} {}
+        auto operator->() const { return it.operator->(); }
+        auto operator*()  const { return it.operator*(); }
+        auto operator==(const edge_refference<node_data_t, edge_data_t, node_key_t>& o) const { return it == o.it; }
+        auto operator!=(const edge_refference<node_data_t, edge_data_t, node_key_t>& o) const { return it != o.it; }
+    };
+    template<typename node_data_t, typename edge_data_t, typename node_key_t>
+    struct node_refference {
+        typename node_collection<node_data_t,edge_data_t,node_key_t>::iterator it{};
+        node_refference(const typename node_collection<node_data_t,edge_data_t,node_key_t>::iterator& it) : it{it} {}
+        auto operator->() const { return it.operator->(); }
+        auto operator*()  const { return it.operator*(); }
+        auto operator==(const node_refference<node_data_t, edge_data_t, node_key_t>& o) const { return it == o.it; }
+        auto operator!=(const node_refference<node_data_t, edge_data_t, node_key_t>& o) const { return it != o.it; }
+    };
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
     struct edge {
@@ -131,7 +145,7 @@ namespace ya {
     auto graph_builder<node_data_t,edge_data_t,node_key_t>::is_valid() -> bool {
         node_collection<node_data_t, edge_data_t, node_key_t> check_nodes{};
         for(auto& nco : nodes)
-            check_nodes[nco.get_key()] = {nco.get_data(), {}};
+            check_nodes.insert({nco.get_key(), {nco.get_data(), {}}});
         for(auto& eco : edges)
             if (!check_nodes.contains(eco.source) && check_nodes.contains(eco.target))
                 return false;
@@ -143,11 +157,11 @@ namespace ya {
         validate();
         graph<node_data_t,edge_data_t,node_key_t> result{};
         for(auto& nco : nodes)
-            result.nodes[nco.get_key()] = {nco.get_data(), {}};
+            result.nodes.insert({nco.get_key(), {nco.get_data(), {}}});
         for(auto& eco : edges) {
             auto source_it = result.nodes.find(eco.source);
             auto target_it = result.nodes.find(eco.target);
-            result.edges[eco.data] = {eco.data, source_it, target_it};
+            result.edges.insert({eco.data, {eco.data, source_it, target_it}});
             auto edge_it = result.edges.find(eco.data);
             if(edge_it == result.edges.end())
                 throw std::logic_error("edge construction failed");
@@ -162,11 +176,11 @@ namespace ya {
         validate();
         auto result = std::make_unique<graph<node_data_t,edge_data_t,node_key_t>>();
         for(auto& nco : nodes)
-            result->nodes[nco.get_key()] = {nco.get_data(), {}};
+            result->nodes.insert({nco.get_key(), {nco.get_data(), {}}});
         for(auto& eco : edges) {
             auto source_it = result->nodes.find(eco.source);
             auto target_it = result->nodes.find(eco.target);
-            result->edges[eco.data] = {eco.data, source_it, target_it};
+            result->edges.insert({eco.data, {eco.data, source_it, target_it}});
             auto edge_it = result->edges.find(eco.data);
             if(edge_it == result->edges.end())
                 throw std::logic_error("edge construction failed");
