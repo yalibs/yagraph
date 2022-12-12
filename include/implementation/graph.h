@@ -147,7 +147,7 @@ namespace ya {
         for(auto& nco : nodes)
             check_nodes.insert({nco.get_key(), {nco.get_data(), {}}});
         for(auto& eco : edges)
-            if (!check_nodes.contains(eco.source) && check_nodes.contains(eco.target))
+            if (!check_nodes.contains(eco.source) || !check_nodes.contains(eco.target))
                 return false;
         return true;
     }
