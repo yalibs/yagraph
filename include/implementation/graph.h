@@ -80,6 +80,7 @@ namespace ya {
         };
         struct node_construction_object_only_data {
             const node_key_t data;
+            node_construction_object_only_data(const node_key_t& d) : data{d} {} // NOLINT(google-explicit-constructor)
             auto get_key() const -> node_key_t { return data; }
             auto get_data() const -> node_data_t { return data; }
         };
