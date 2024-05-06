@@ -22,8 +22,9 @@
  */
 #ifndef YAGRAPH_GRAPH_H
 #define YAGRAPH_GRAPH_H
-#include <vector>
+#include <memory>
 #include <unordered_map>
+#include <vector>
 
 namespace ya {
     template<typename node_data_t, typename edge_data_t, typename node_key_t> struct edge;
@@ -96,6 +97,7 @@ namespace ya {
         auto add_edges(const std::initializer_list<edge_construction_object> &data) -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
         auto validate() -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
         auto is_valid() -> bool;
+        auto get_invalid_elements() -> std::vector<node_key_t>;
         auto optimize() -> graph_builder<node_data_t, edge_data_t, node_key_t>&;
         auto build() -> graph<node_data_t, edge_data_t, node_key_t>;
         auto build_heap() -> std::unique_ptr<graph<node_data_t, edge_data_t, node_key_t>>;
@@ -151,6 +153,21 @@ namespace ya {
             if (!check_nodes.contains(eco.source) || !check_nodes.contains(eco.target))
                 return false;
         return true;
+    }
+
+    template<typename node_data_t, typename edge_data_t, typename node_key_t>
+    auto graph_builder<node_data_t,edge_data_t,node_key_t>::get_invalid_elements() -> std::vector<node_key_t> {
+        std::vector<node_key_t> results{};
+        node_collection<node_data_t, edge_data_t, node_key_t> check_nodes{};
+        for(auto& nco : nodes)
+            check_nodes.insert({nco.get_key(), {nco.get_data(), {}}});
+        for(auto& eco : edges) {
+            if (!check_nodes.contains(eco.source))
+                results.push_back(eco.source);
+            if (!check_nodes.contains(eco.target))
+                results.push_back(eco.target);
+        }
+        return results;
     }
 
     template<typename node_data_t, typename edge_data_t, typename node_key_t>
